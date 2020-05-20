@@ -1,6 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const userValidator = require('./userValidator')
+const userValidator = require('./usersValidator')
 const app = express()
 
 const users = [
