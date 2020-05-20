@@ -109,6 +109,3 @@ app.delete('/users/:id/:favorite_products', (req, res) => {
 app.listen(5000, function() {
   console.log("servidor rodando na porta 5000")
 })
-
-
-
