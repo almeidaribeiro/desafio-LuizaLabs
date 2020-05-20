@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const userValidator = require('./usersValidator')
 const app = express()
+const PORT = process.env.PORT || 5000
 
 const users = [
   {
@@ -106,6 +107,6 @@ app.delete('/users/:id/:favorite_products', (req, res) => {
   res.send(users[indexUser])// retornar os produtos sem o excluido ou  o excluido?
 })
 
-app.listen(5000, function() {
-  console.log("servidor rodando na porta 5000")
+app.listen(PORT, function() {
+  console.log("servidor rodando...")
 })
