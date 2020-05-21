@@ -1,6 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const userValidator = require('./usersValidator')
+const {userValidator, usersPathValidator} = require('./usersValidator')
+const productValidator = require('./productsValidator')
 const app = express()
 const PORT = process.env.PORT || 5000
 
@@ -11,10 +12,10 @@ const users = [
     email: "usuario1@gmail.com",
     favorite_products: [
       {
-        id: "1bf0f365-fbdd-4e21-9786-da459d78dd1f",
+        id: "1bf0f365-fbdd-4e21-9786-da459d78dd1f"
       },
       {
-        id: "958ec015-cfcf-258d-c6df-1721de0ab6ea",
+        id: "958ec015-cfcf-258d-c6df-1721de0ab6ea"
       }
     ]
   },
@@ -24,10 +25,10 @@ const users = [
     email: "usuario2@gmail.com",
     favorite_products: [
       {
-        id: "6a512e6c-6627-d286-5d18-583558359ab6",
+        id: "6a512e6c-6627-d286-5d18-583558359ab6"
       },
       {  
-        id: "4bd442b1-4a7d-2475-be97-a7b22a08a024",
+        id: "4bd442b1-4a7d-2475-be97-a7b22a08a024"
       }
     ]
   }
@@ -45,11 +46,13 @@ app.get('/users_by_email', (req, res) => { //alterar isso antes de entregar
   user = users[indexUser]
 
   res.send(user)
-})
+})// testar
 
-app.get('/users/:id', (req, res) => {
+app.get('/users/:id', usersPathValidator, (req, res) => {
+  console.log(req)
   const userId = parseInt(req.params.id)
   const indexUser = users.findIndex(user => user.id === userId)
+
 
   user = users[indexUser]
 
@@ -64,7 +67,7 @@ app.post('/users', userValidator, (req,res) => {
   res.send(newUser)//devolve o usuario adicionado apenas, deveria mostrar todos?
 })
 
-app.put('/users/:id', (req, res) => { //precisa?
+app.put('/users/:id', userValidator, (req, res) => { //precisa?
   const userId = parseInt(req.params.id)
   const userPayload = req.body
   const indexUser = users.findIndex(user => user.id === userId)
@@ -84,7 +87,7 @@ app.delete('/users/:id', (req, res)=> {
   res.send(deletedUser)//mostra qual foi deletado
 })
 
-app.post('/users/:id/:favorite_products', (req, res) => {
+app.post('/users/:id/:favorite_products', productValidator, (req, res) => {
   const userId = parseInt(req.params.id)
   const newFavorite = req.body
   const indexUser = users.findIndex(user => user.id === userId)
