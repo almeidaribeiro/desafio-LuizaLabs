@@ -1,7 +1,7 @@
    const Joi = require('@hapi/joi')
-   const {usersSchema, usersIdSchema} = require('./schema')
+   const {usersSchema, usersIdSchema, usersEmailSchema} = require('./schema')
 
-  const userValidator = async (req, res, next) => {
+  const usersValidator = async (req, res, next) => {
       const {error} = usersSchema.validate(req.body, {abortEarly: false});
       if (error) return res.status(400).json({error});
       next();
@@ -12,7 +12,14 @@
     if (error) return res.status(400).json({error});
     next();
 }
+
+const usersEmailValidator = async (req, res, next) => {
+    const {error} = usersEmailSchema.validate(req.body, {abortEarly: false});
+    if (error) return res.status(400).json({error});
+    next();
+}
   module.exports = {
-    userValidator,
+    usersValidator,
     usersPathValidator,
+    usersEmailValidator,
   }

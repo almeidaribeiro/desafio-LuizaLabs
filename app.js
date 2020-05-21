@@ -1,7 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const {userValidator, usersPathValidator} = require('./usersValidator')
-const productValidator = require('./productsValidator')
+const {usersValidator, usersPathValidator, usersEmailValidator} = require('./usersValidator')
+const {productsValidator, productsPathValidator} = require('./productsValidator')
 const app = express()
 const PORT = process.env.PORT || 5000
 
@@ -40,7 +40,7 @@ app.get('/users', (req, res) => {
   res.status(200).send(JSON.stringify(users))
 })
 
-app.get('/users_by_email', (req, res) => { //alterar isso antes de entregar 
+app.get('/users_by_email', usersEmailValidator, (req, res) => { //alterar isso antes de entregar 
   const email = req.body.email
   const indexUser = users.findIndex(user => user.email === email)
   user = users[indexUser]
@@ -59,7 +59,7 @@ app.get('/users/:id', usersPathValidator, (req, res) => {
   res.send(JSON.stringify(user))
 })
 
-app.post('/users', userValidator, (req,res) => {
+app.post('/users', usersValidator, (req,res) => {
   const newUser = req.body
 
   users.push(newUser)
@@ -67,7 +67,7 @@ app.post('/users', userValidator, (req,res) => {
   res.send(newUser)//devolve o usuario adicionado apenas, deveria mostrar todos?
 })
 
-app.put('/users/:id', userValidator, (req, res) => { //precisa?
+app.put('/users/:id', usersValidator, usersPathValidator, (req, res) => { //precisa?
   const userId = parseInt(req.params.id)
   const userPayload = req.body
   const indexUser = users.findIndex(user => user.id === userId)
@@ -77,7 +77,7 @@ app.put('/users/:id', userValidator, (req, res) => { //precisa?
   res.send(users[indexUser]) //retorna o user q foi alterado 
 })
 
-app.delete('/users/:id', (req, res)=> {
+app.delete('/users/:id', usersPathValidator, (req, res)=> {
   const userId = parseInt(req.params.id)
   const indexUser = users.findIndex(user => user.id === userId)
   const deletedUser = users[indexUser]
@@ -87,7 +87,7 @@ app.delete('/users/:id', (req, res)=> {
   res.send(deletedUser)//mostra qual foi deletado
 })
 
-app.post('/users/:id/:favorite_products', productValidator, (req, res) => {
+app.post('/users/:id/:favorite_products', productsValidator, productsPathValidator, (req, res) => {
   const userId = parseInt(req.params.id)
   const newFavorite = req.body
   const indexUser = users.findIndex(user => user.id === userId)
@@ -98,7 +98,7 @@ app.post('/users/:id/:favorite_products', productValidator, (req, res) => {
   res.send(users[indexUser])
 })
 
-app.delete('/users/:id/:favorite_products', (req, res) => {
+app.delete('/users/:id/:favorite_products', productsPathValidator, (req, res) => {
   const userId = parseInt(req.params.id)
   const indexUser = users.findIndex(user => user.id === userId)
   const productId = req.body.id
