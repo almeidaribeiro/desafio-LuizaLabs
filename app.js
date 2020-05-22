@@ -2,42 +2,36 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const {usersValidator, usersPathValidator, usersEmailValidator} = require('./usersValidator')
 const {productsValidator, productsPathValidator} = require('./productsValidator')
+const {Client} = require('pg');
 const app = express()
 const PORT = process.env.PORT || 5000
 
-const users = [
-  {
-    id: 1,
-    name: "usuario1",
-    email: "usuario1@gmail.com",
-    favorite_products: [
-      {
-        id: "1bf0f365-fbdd-4e21-9786-da459d78dd1f"
-      },
-      {
-        id: "958ec015-cfcf-258d-c6df-1721de0ab6ea"
-      }
-    ]
-  },
-  {
-    id: 2,
-    name: "usuario2",
-    email: "usuario2@gmail.com",
-    favorite_products: [
-      {
-        id: "6a512e6c-6627-d286-5d18-583558359ab6"
-      },
-      {  
-        id: "4bd442b1-4a7d-2475-be97-a7b22a08a024"
-      }
-    ]
-  }
-] 
+const client = new Client({
+  user: 'boo',
+  host: 'localhost',
+  database: 'postgres',
+  password: 'boodb',
+  port: '5432'
+});
+
+client.connect();
+console.log('connected client')
 
 app.use(bodyParser.json())
 
 app.get('/users', (req, res) => {
-  res.status(200).send(JSON.stringify(users))
+  const selectUsers = `SELECT * FROM users`
+  
+  client.query(selectUsers, (err, dbRes) => {
+    if(err) {
+      console.error(err);
+      res.status(400).send({msg:'error on query'})
+      return;
+    }
+    const users = dbRes.rows.map(x => x)
+    const payload = JSON.stringify(users)
+    res.status(200).send(payload)
+  });  
 })
 
 app.get('/users_by_email', usersEmailValidator, (req, res) => { //alterar isso antes de entregar 
@@ -60,11 +54,26 @@ app.get('/users/:id', usersPathValidator, (req, res) => {
 })
 
 app.post('/users', usersValidator, (req,res) => {
-  const newUser = req.body
+  const userName = req.body.name
+  const userEmail = req.body.email
+  const insertNewUser = `INSERT INTO users (name, email) VALUES  ('${userName}', '${userEmail}')`
+ 
+  client.query(insertNewUser, (err, dbRes) => {
+    if(err) {
+      console.log(err)
+      const payload = {msg: 'error on query'}
+      res.status(400).send(payload)
+      return;
+    }
+    console.log('New user data insert successful');
+    const payload = {
+      name: req.body.name,
+      email: req.body.email
+    }
 
-  users.push(newUser)
-
-  res.send(newUser)//devolve o usuario adicionado apenas, deveria mostrar todos?
+    res.status(200).send(payload)
+  }); 
+  
 })
 
 app.put('/users/:id', usersValidator, usersPathValidator, (req, res) => { //precisa?
@@ -89,13 +98,26 @@ app.delete('/users/:id', usersPathValidator, (req, res)=> {
 
 app.post('/users/:id/:favorite_products', productsValidator, productsPathValidator, (req, res) => {
   const userId = parseInt(req.params.id)
-  const newFavorite = req.body
-  const indexUser = users.findIndex(user => user.id === userId)
-  const favoriteProducts = users[indexUser].favorite_products
+  const p_id = req.body.id
 
-  favoriteProducts.push(newFavorite)
+  // codigo de insert
 
-  res.send(users[indexUser])
+  //codigo p select:
+
+  // const x =  [[1, 1], [1, 2]]  
+  // const favs = x.map(each => each[1])
+
+  // [1, 2]
+
+  // {
+  //   user_id: 
+  // }
+  
+  // const indexUser = users.findIndex(user => user.id === userId)
+  // const favoriteProducts = users[indexUser].favorite_products
+  // favoriteProducts.push(newFavorite)
+
+  // res.send(users[indexUser])
 })
 
 app.delete('/users/:id/:favorite_products', productsPathValidator, (req, res) => {
