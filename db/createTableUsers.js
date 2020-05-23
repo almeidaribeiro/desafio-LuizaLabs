@@ -13,7 +13,7 @@ console.log('connected client')
 
 const createTableUsers = `
     CREATE TABLE users (
-        id      SERIAL PRIMARY KEY,
+        user_id      SERIAL PRIMARY KEY,
         name    text NOT NULL,
         email   text UNIQUE NOT NULL
     );

@@ -4,7 +4,7 @@ const {usersValidator, usersPathValidator, usersEmailValidator} = require('./use
 const {productsValidator, productsPathValidator} = require('./productsValidator')
 const {Client} = require('pg');
 const app = express()
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 8000
 
 const client = new Client({
   user: 'boo',
@@ -20,7 +20,8 @@ console.log('connected client')
 app.use(bodyParser.json())
 
 app.get('/users', (req, res) => {
-  const selectUsers = `SELECT * FROM users`
+  const selectUsers = `SELECT * FROM users left join favorite_products on users.user_id=favorite_products.user_id`
+  // select * from users left join favorite_products on users.user_id=favorite_products.user_id 
   
   client.query(selectUsers, (err, dbRes) => {
     if(err) {
@@ -32,25 +33,36 @@ app.get('/users', (req, res) => {
     const payload = JSON.stringify(users)
     res.status(200).send(payload)
   });  
+})//tem que retornar a lista de produtos favoritos tb
+
+app.get('/user_by_email', usersEmailValidator, (req, res) => { //alterar isso antes de entregar 
+  const userEmail =  req.body
+  const selectUser = `SELECT * FROM users WHERE email='${userEmail}'`   
+
+  client.query(selectUser, (err, dbRes) => {
+    if(err) {
+      console.error(err);
+      res.status(400).send({msg:'error on query'})
+      return;
+    }
+    const user = dbRes.rows.map(x => x)
+    console.log(user)
+    const payload = JSON.stringify(user)
+    res.status(200).send(payload) // como retornar a resposta do db?*********
+  }); 
 })
 
-app.get('/users_by_email', usersEmailValidator, (req, res) => { //alterar isso antes de entregar 
-  const email = req.body.email
-  const indexUser = users.findIndex(user => user.email === email)
-  user = users[indexUser]
-
-  res.send(user)
-})// testar
-
-app.get('/users/:id', usersPathValidator, (req, res) => {
-  console.log(req)
-  const userId = parseInt(req.params.id)
-  const indexUser = users.findIndex(user => user.id === userId)
-
-
-  user = users[indexUser]
-
-  res.send(JSON.stringify(user))
+app.get('/users/:user_id', usersPathValidator, (req, res) => {
+  const userId = parseInt(req.params.user_id)
+  // const selectUser = `SELECT * FROM users WHERE id = ${userId}`
+  const selectUser = `SELECT * FROM users left join favorite_products on users.user_id=favorite_products.user_id WHERE user_id=${userId}`  
+  client.query( selectUser, (error, dbRes) => {
+    if (error) {
+      throw error
+    }
+      const user = dbRes.rows 
+      res.status(200).json(user)
+  })
 })
 
 app.post('/users', usersValidator, (req,res) => {
@@ -65,73 +77,95 @@ app.post('/users', usersValidator, (req,res) => {
       res.status(400).send(payload)
       return;
     }
-    console.log('New user data insert successful');
     const payload = {
       name: req.body.name,
       email: req.body.email
     }
+    res.status(200).send(payload)
+  });  
+})
 
+app.put('/users/:user_id', usersValidator, usersPathValidator, (req, res) => { 
+  const userId = parseInt(req.params.user_id)
+  const userName = req.body.name
+  // const userEmail = req.body.email
+  // const updateUser = `UPDATE users SET name='${userName}' email='${userEmail}' WHERE id=${userId}`
+  const updateUser = `UPDATE users SET name='${userName}' WHERE id=${userId}`
+
+  client.query(updateUser, (err, dbRes) => {
+    if(err) {
+      console.log(err)
+      const payload = {msg: 'error on query'}
+      res.status(400).send(payload)
+      return;
+    }
+    console.log('New user data insert successful');
+    const result = dbRes.rows.map(x => x[0])
+    console.log(result)//problema c om o email ele n atualiza mas tb n consigo mandar sem
+    const payload = {
+      name: req.body.name,
+      email: req.body.email
+    }
     res.status(200).send(payload)
   }); 
-  
 })
 
-app.put('/users/:id', usersValidator, usersPathValidator, (req, res) => { //precisa?
-  const userId = parseInt(req.params.id)
-  const userPayload = req.body
-  const indexUser = users.findIndex(user => user.id === userId)
+app.delete('/users/:user_id', usersPathValidator, (req, res)=> {
+  const userId = parseInt(req.params.user_id)
+  const deleteUser = `DELETE FROM users WHERE user_id=${userId}`
 
-  users.splice(indexUser, 1, userPayload)
-
-  res.send(users[indexUser]) //retorna o user q foi alterado 
+  client.query(deleteUser, (err, dbRes) => {
+    if(err) {
+      console.log(err)
+      const payload = {msg: 'error on query'} 
+      res.status(400).send(payload)
+      return;
+    }
+    const payload = {
+      user_id:`${userId}`, 
+    }
+    res.status(200).send(payload)
+  });  
 })
 
-app.delete('/users/:id', usersPathValidator, (req, res)=> {
-  const userId = parseInt(req.params.id)
-  const indexUser = users.findIndex(user => user.id === userId)
-  const deletedUser = users[indexUser]
+app.post('/users/:user_id/:favorite_products', productsValidator, productsPathValidator, (req, res) => {
+  const userId = parseInt(req.params.user_id)
+  const product_id = req.body.product_id
+  const insertNewProduct = `INSERT INTO favorite_products (user_id, product_id) VALUES (${userId}, '${product_id}')`
 
-  users.splice(indexUser, 1)
-
-  res.send(deletedUser)//mostra qual foi deletado
+  client.query(insertNewProduct, (err, dbRes) => {
+    if(err) {
+      console.log(err)
+      const payload = {msg: 'error on query'}
+      res.status(400).send(payload)
+      return;
+    }
+    const payload = {
+      product_id: product_id
+    }
+    res.status(200).send(payload)
+  }); 
 })
 
-app.post('/users/:id/:favorite_products', productsValidator, productsPathValidator, (req, res) => {
-  const userId = parseInt(req.params.id)
-  const p_id = req.body.id
+app.delete('/users/:user_id/:favorite_products', productsPathValidator, (req, res) => {
+  const userId = parseInt(req.params.user_id)
+  const productId = req.body.product_id
+  const deleteProduct = `DELETE FROM favorite_products WHERE user_id=${userId} and product_id='${productId}'`
 
-  // codigo de insert
-
-  //codigo p select:
-
-  // const x =  [[1, 1], [1, 2]]  
-  // const favs = x.map(each => each[1])
-
-  // [1, 2]
-
-  // {
-  //   user_id: 
-  // }
-  
-  // const indexUser = users.findIndex(user => user.id === userId)
-  // const favoriteProducts = users[indexUser].favorite_products
-  // favoriteProducts.push(newFavorite)
-
-  // res.send(users[indexUser])
-})
-
-app.delete('/users/:id/:favorite_products', productsPathValidator, (req, res) => {
-  const userId = parseInt(req.params.id)
-  const indexUser = users.findIndex(user => user.id === userId)
-  const productId = req.body.id
-  const favoriteProducts = users[indexUser].favorite_products
-  const productIndex = favoriteProducts.findIndex(product => product.id === productId)
-  
-  favoriteProducts.splice(productIndex, 1)
-
-  res.send(users[indexUser])// retornar os produtos sem o excluido ou  o excluido?
+  client.query(deleteProduct, (err, dbRes) => {
+    if(err) {
+      console.log(err)
+      const payload = {msg: 'error on query'}
+      res.status(400).send(payload)
+      return;
+    }
+    const payload = {
+      product_id: `${productId}`
+    }
+    res.status(200).send(payload)
+  })
 })
 
 app.listen(PORT, function() {
   console.log("servidor rodando...")
-})
+});
