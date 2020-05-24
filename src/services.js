@@ -1,5 +1,6 @@
 const {executeSql} = require('./db');
-const {rowsToPayload} = require('./formatter')
+const {rowsToUser} = require('./formatter')
+const {getFavoriteProductsFromApi} = require('./http-requests')
 
 const getUsers = async (res) => {
   const selectUsersSql = `
@@ -20,9 +21,9 @@ const getUsers = async (res) => {
   const user_ids = rows.map(x => x.user_id)
   const user_ids_set = new Set(user_ids)
   const user_ids_unique = [...user_ids_set]
-  let payload = {}
+  let mapperIdToUser = {}
   for (let id of user_ids_unique) {
-    payload[id] = {
+    mapperIdToUser[id] = {
       user_id: id,
       name: null,
       email: null,
@@ -32,16 +33,25 @@ const getUsers = async (res) => {
 
   for (let row of rows) {
     let user_id = row.user_id
-    payload[user_id].name = row.name
-    payload[user_id].email = row.email
+    mapperIdToUser[user_id].name = row.name
+    mapperIdToUser[user_id].email = row.email
     if (row.product_id !== null) {
-      payload[user_id].favorite_products.push(row.product_id)
+      mapperIdToUser[user_id].favorite_products.push(row.product_id)
     }
   }
 
-  payload = Object.values(payload)
+  const usersRaw = Object.values(mapperIdToUser)
 
-  res.send(payload)
+  const users = []
+  for (let userRaw of usersRaw) {
+    let userNew = {
+      ...userRaw,
+      favorite_products: await getFavoriteProductsFromApi(userRaw.favorite_products)
+    }
+    users.push(userNew)
+  }
+
+  res.send(users)
 }
 
 const getUserByEmail = async (userEmail, res) => {
@@ -69,7 +79,13 @@ const getUserByEmail = async (userEmail, res) => {
     return
   }
 
-  const payload = rowsToPayload(rows)
+  const userRaw = rowsToUser(rows)
+  
+  const payload = {
+    ...userRaw,
+    favorite_products: await getFavoriteProductsFromApi(userRaw.favorite_products)
+  }
+ 
   res.send(payload)
 }
 
@@ -96,9 +112,14 @@ const getUserById = async (userId, res) => {
     return
   }
 
-  const payload = rowsToPayload(rows)
-  res.send(payload)
+  const userRaw = rowsToUser(rows)
 
+  const payload = {
+    ...userRaw,
+    favorite_products: await getFavoriteProductsFromApi(userRaw.favorite_products)
+  }
+
+  res.send(payload)
 }
 
 const postUsers = async (userName, userEmail, res) => {
@@ -157,7 +178,7 @@ const patchUsers = async (userId, userName, res) => {
   await executeSql(updateUserSql)
   const dbResp = await executeSql(selectUserSql)
   const rows = dbResp.rows
-  const payload = rowsToPayload(rows)
+  const payload = rowsToUser(rows)
   res.send(payload)
 }
 
@@ -191,7 +212,13 @@ const deleteUsers = async (userId, res) => {
   }
 
   await executeSql(deleteUserSql)
-  const payload = rowsToPayload(rows)
+  const userRaw = rowsToUser(rows)
+
+  const payload = {
+    ...userRaw,
+    favorite_products: await getFavoriteProductsFromApi(userRaw.favorite_products)
+  }
+
   res.send(payload)
 }
 
@@ -222,7 +249,7 @@ const postFavoriteProducts = async (userId, productId, res) => {
     return
   }
   
-  const payloadOld = rowsToPayload(dbResp.rows)
+  const payloadOld = rowsToUser(dbResp.rows)
   if (payloadOld.favorite_products.includes(productId)) {
     const payload = {
       "msg": "Product already added"
@@ -234,9 +261,14 @@ const postFavoriteProducts = async (userId, productId, res) => {
   await executeSql(insertProductSql)
 
   dbResp = await executeSql(selectUserSql)
-  const payloadNew = rowsToPayload(dbResp.rows)
-  res.send(payloadNew)
+  const userRaw = rowsToUser(dbResp.rows)
 
+  const payload  = {
+      ...userRaw,
+      favorite_products: await getFavoriteProductsFromApi(userRaw.favorite_products)
+  }
+
+  res.send(payload)
 }
 
 const deleteFavoriteProducts = async (userId, productId, res) => {
@@ -268,7 +300,7 @@ const deleteFavoriteProducts = async (userId, productId, res) => {
     res.status(404).send(payload)
     return
   }
-  const payloadOld = rowsToPayload(rowsOld)
+  const payloadOld = rowsToUser(rowsOld)
   if (!payloadOld.favorite_products.includes(productId)) {
     const payload = {
       "msg": 'Product not found'
@@ -279,9 +311,14 @@ const deleteFavoriteProducts = async (userId, productId, res) => {
 
   await executeSql(deleteProductSql)
   const dbRespNew = await executeSql(selectUserSql)
-  const payloadNew = rowsToPayload(dbRespNew.rows)
+  const userRaw = rowsToUser(dbRespNew.rows)
 
-  res.send(payloadNew)  
+  const payload = {
+    ...userRaw,
+    favorite_products: await getFavoriteProductsFromApi(userRaw.favorite_products)
+  }
+
+  res.send(payload)  
 }
 
 module.exports = {

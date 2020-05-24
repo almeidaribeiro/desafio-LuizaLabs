@@ -1,6 +1,6 @@
 
 
-const rowsToPayload = (rows) => {
+const rowsToUser = (rows) => {
     let product_ids = rows.map(row => row.product_id)
     product_ids = product_ids.filter(id => id !== null)
     const payload = {
@@ -13,5 +13,5 @@ const rowsToPayload = (rows) => {
 }
 
 module.exports = {
-    rowsToPayload
+    rowsToUser
 }

@@ -1,13 +1,7 @@
 const {Client} = require('pg');
 
 const executeSql = async (sql) => {
-  const client = new Client({
-    user: 'boo',
-    host: 'localhost',
-    database: 'postgres',
-    password: 'boodb',
-    port: '5432'
-  });
+  const client = new Client();
   return await client.connect()
     .then(() => client.query(sql))
     .catch(err => {
