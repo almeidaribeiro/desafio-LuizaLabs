@@ -1,6 +1,8 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 
+const { isLegitToken } = require('./auth')
+
 const { 
   usersValidator, 
   usersPathValidator, 
@@ -15,13 +17,22 @@ const {
   patchUsers,
   deleteUsers,
   postFavoriteProducts,
-  deleteFavoriteProducts
+  deleteFavoriteProducts,
+  postAuth
 } = require('./services')
 
 
 const app = express();
 
 app.use(bodyParser.json())
+
+app.all('*', isLegitToken)
+
+app.post('/auth', (req, res) => {
+  const adminName = req.body.admin_name
+  const password = req.body.password
+  postAuth(adminName, password, res)
+})
 
 app.get('/users', (req, res) => {
   getUsers(res) 

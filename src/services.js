@@ -1,6 +1,27 @@
+const jwt = require('jsonwebtoken')
+
 const {executeSql} = require('./db');
 const {rowsToUser} = require('./formatter')
 const {getFavoriteProductsFromApi} = require('./http-requests')
+const {ADMIN_NAME, PASSWORD} = require('./config') 
+
+const postAuth = (adminName, password, res) => {
+  if (adminName !== ADMIN_NAME || password !== PASSWORD) {
+    res.send({msg: 'admin name or password are incorret'})
+    return
+  }
+
+  const admin = {
+    admin_name: adminName
+  }
+  const token = jwt.sign(admin, process.env.SECRET)
+
+  const payload = {
+    token: token
+  }
+  res.send(payload)
+}
+
 
 const getUsers = async (res) => {
   const selectUsersSql = `
@@ -329,5 +350,6 @@ module.exports = {
     patchUsers,
     deleteUsers,
     postFavoriteProducts,
-    deleteFavoriteProducts
+    deleteFavoriteProducts,
+    postAuth
 }
