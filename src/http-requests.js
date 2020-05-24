@@ -8,23 +8,25 @@ const getFavoriteProductsFromApi = async (productIds) => {
     const products = []
     for (let id of productIds) {
         let secs = 500
-        while (true) {
+        let shouldContinue = true
+        while (shouldContinue) {
             console.log(`requesting ${id} from API...`)
-            try {
-                await sleep(secs)
-                let resp = await axios.get(`http://challenge-api.luizalabs.com/api/product/${id}`)
-                products.push(resp.data)
-                break
-            }
-            catch(err) {
-                console.log("error on request, will retry...")
-                secs = secs + 1000
-            }
+            await sleep(secs)
+            await axios.get(`http://challenge-api.luizalabs.com/api/product/${id}`)
+                .then(resp => {
+                    products.push(resp.data)
+                    shouldContinue = false 
+                })
+                .catch(err => {
+                    secs = secs + 1000
+                    console.log(err, "errror")
+                    console.log(`error on request, will retry in ${secs} secs...`)
+                })       
         }
-        
     }
     return products
-}
+} 
+
 
 module.exports = {
     getFavoriteProductsFromApi
