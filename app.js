@@ -6,11 +6,26 @@ const {Client} = require('pg');
 const app = express()
 const PORT = process.env.PORT || 5000
 
-
 app.use(bodyParser.json())
 
-app.get('/users', (req, res) => {
-   const selectUsers = `
+const executeSql = async (sql) => {
+  const client = new Client({
+    user: 'boo',
+    host: 'localhost',
+    database: 'postgres',
+    password: 'boodb',
+    port: '5432'
+  });
+  return await client.connect()
+    .then(() => client.query(sql))
+    .catch(err => {
+      client.end()
+      throw err
+    })
+}
+
+const getUsers = async (res) => {
+  const selectUsersSql = `
     select 
       u.user_id,
       u.name,
@@ -20,27 +35,48 @@ app.get('/users', (req, res) => {
       left join favorite_products p
         on u.user_id=p.user_id 
   `
+
+  let dbResp = await executeSql(selectUsersSql)
+
+  const rows = dbResp.rows
+  const ids = dbResp.rows.map(x => x.user_id)
+  console.log(ids)
+}
+
+
+app.get('/users', (req, res) => {
+  getUsers(res)
+  //  const selectUsers = `
+  //   select 
+  //     u.user_id,
+  //     u.name,
+  //     u.email,
+  //     p.product_id
+  //   from users u
+  //     left join favorite_products p
+  //       on u.user_id=p.user_id 
+  // `
   
-  client.query(selectUsers, (err, dbRes) => {
-    if(err) {
-      console.error(err);
-      res.status(400).send({err, msg:'error on query'})
-      return;
-    }
-    const rows = dbRes.rows
-    const user_id = rows[0].user_id
-    const name = rows[0].name
-    const email = rows[0].email
-    const productsId = rows.map(product => product.product_id)
-    const payload = {
-      user_id: user_id,
-      name: name,
-      email: email,
-      favorite_products: productsId
-    }
-    console.log(payload)
-    res.status(200).send(payload) //ta vindo null e n ta vindo tds os usuarios 
-  });  
+  // client.query(selectUsers, (err, dbRes) => {
+  //   if(err) {
+  //     console.error(err);
+  //     res.status(400).send({err, msg:'error on query'})
+  //     return;
+  //   }
+  //   const rows = dbRes.rows
+  //   const user_id = rows[0].user_id
+  //   const name = rows[0].name
+  //   const email = rows[0].email
+  //   const productsId = rows.map(product => product.product_id)
+  //   const payload = {
+  //     user_id: user_id,
+  //     name: name,
+  //     email: email,
+  //     favorite_products: productsId
+  //   }
+  //   console.log(payload)
+  //   res.status(200).send(payload) //ta vindo null e n ta vindo tds os usuarios 
+  // });  
 })
 
 app.get('/user_by_email', usersEmailValidator, (req, res) => { //alterar isso antes de entregar 
@@ -112,22 +148,6 @@ app.get('/users/:user_id', usersPathValidator, (req, res) => {
       res.status(200).send(payload)
   }); 
 })
-
-const executeSql = async (sql) => {
-  const client = new Client({
-    user: 'boo',
-    host: 'localhost',
-    database: 'postgres',
-    password: 'boodb',
-    port: '5432'
-  });
-  return await client.connect()
-    .then(() => client.query(sql))
-    .catch(err => {
-      client.end()
-      throw err
-    })
-}
 
 const postUsers = async (userName, userEmail, res) => {
   const insertUserSql = `
