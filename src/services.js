@@ -279,6 +279,13 @@ const postFavoriteProducts = async (userId, productId, res) => {
     return
   }
 
+  const products = await getFavoriteProductsFromApi([productId])
+
+  if (products.length === 0) {
+    res.status(404).send({msg: 'product does not exist'})
+    return
+  }
+
   await executeSql(insertProductSql)
 
   dbResp = await executeSql(selectUserSql)

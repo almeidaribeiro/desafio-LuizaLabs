@@ -18,9 +18,15 @@ const getFavoriteProductsFromApi = async (productIds) => {
                     shouldContinue = false 
                 })
                 .catch(err => {
-                    secs = secs + 1000
-                    console.log(err, "errror")
-                    console.log(`error on request, will retry in ${secs} secs...`)
+                    if (err.response.status === 404) {
+                        shouldContinue = false 
+                    } 
+                    else {
+                        secs = secs + 1000
+                        console.log(err, "errror")
+                        console.log(`error on request, will retry in ${secs} secs...`)
+                    }
+                   
                 })       
         }
     }
