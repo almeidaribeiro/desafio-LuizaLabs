@@ -15,7 +15,7 @@ Authorization: Bearer <token-de-autenticação>
 
 Abaixo segue um exemplo de como adquirir e utilizar o token.
 
-```bash
+```
 POST /auth
 
 //exemplo de body na requisição:
@@ -48,12 +48,12 @@ https://docs.docker.com/get-docker/
 
 Para rodar uma instancia do Postgres execute o seguinte comando docker:
 
-```bash 
+``` 
 docker run --rm --name postgres -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres
 ```
 Para criar as tabelas no de banco de dados execute os sequintes comandos:
 
-```bash
+```
 docker cp ./db/createTables.sql postgres:createTables.sql 
 docker exec -u postgres postgres psql postgres postgres -f createTables.sql
 ```
@@ -62,12 +62,12 @@ docker exec -u postgres postgres psql postgres postgres -f createTables.sql
 
 Clonar o repositório:
 
-```bash
+```
 git clone https://github.com/almeidaribeiro/desafio-LuizaLabs.git
 ```
 Para rodar a API execute os comandos abaixo: 
 
- ```bash
+ ```
 cd desafio-LuizaLabs
  
  docker build . -t luiza-api  
@@ -81,17 +81,15 @@ docker run --name luiza-api -e ADMIN_NAME=luiza-admin -e PASSWORD=luiza-password
 
 ## Como utilizar a API
 
-Todos os exemplos assumem que o o token de autenticação está presente no header da seguinter forma:
+Todos os exemplos assumem que o o token de autenticação está presente no header da seguinte forma:
 ```
 Authorization: Bearer <token-de-autenticação>
 ```
 
-```bash
-
+```
 POST /auth
 
 //exemplo de body na requisição:
-
 {
   "admin_name": "luiza-admin",
   "password": "luiza-password"
@@ -105,10 +103,10 @@ POST /auth
 O endpoint acima retorna o token necessária para autenticação.
 
 ---
-```bash
+```
 POST /users
 
-// exemplo do body na requisição:
+//exemplo do body na requisição:
 {
   "name": "user1",
   "email": "user1@gmail.com"
@@ -121,10 +119,10 @@ POST /users
   "email": "user1@gmail.com"
 }
 ```
-O endpoint acima retorna o novo usuário criado.
+O endpoint acima cria e retorna o novo usuário.
 
 ---
-```bash
+```
 
 GET /users
 
@@ -173,12 +171,12 @@ GET /users
 O endpoint acima retorna todos os usuários. Se houver produtos adicionados em `favorite_products` retornará as informações desses produtos, se não o campo virá com a lista vazia. 
 
 ----
-```bash
+```
 GET /user_by_id
 
 //exemplo de body na requisição:
 {
-"email": "user1@gmail.com"
+    "email": "user1@gmail.com"
 }
 
 //exemplo de resposta:
@@ -210,7 +208,7 @@ O endpoint acima retorna o usuário que corresponde ao email usado para a consul
 ----
 
 
-```bash
+```
 
 GET /users/:user_id
 
@@ -246,7 +244,7 @@ O endpoint acima retorna as informações de um usuário.
 
 ----
 
-```bash
+```
 PATCH /users/:user_id
 
 //exemplo de body na requisição:
@@ -282,7 +280,7 @@ O endpoint acima é usado para que se possa atualizar o nome do usuário, porém
 
 ----
 
-```bash
+```
 DELETE /users/:user_id
 
 //exemplo de body na requisição:
@@ -316,7 +314,7 @@ O endepoint retorna as informações do usuário deletado.
 
 ----
 
-```bash
+```
 POST /users/:user_id/favorite_products
 
 //exemplo de body na requisição:
@@ -359,7 +357,7 @@ O endpoint retorna o usuário com o novo produto adicionado no final da sua list
 ----
 
 
-```bash
+```
 DELETE  /users/:user_id/favorite_products
 
 //exemplo de bodu na requisição:
