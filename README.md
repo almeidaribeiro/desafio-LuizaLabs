@@ -44,6 +44,14 @@ Para instalar o Docker siga as instruções do link abaixo:
 
 https://docs.docker.com/get-docker/
 
+#### Clonar o repositório:
+
+Para clonar esse repositório basta usar este comando abaixo.
+
+```
+git clone https://github.com/almeidaribeiro/desafio-LuizaLabs.git
+```
+
 #### Rodar Postgres & criar tabelas
 
 Para rodar uma instancia do Postgres execute o seguinte comando docker:
@@ -60,11 +68,6 @@ docker exec -u postgres postgres psql postgres postgres -f createTables.sql
 
 #### Rodar API
 
-Clonar o repositório:
-
-```
-git clone https://github.com/almeidaribeiro/desafio-LuizaLabs.git
-```
 Para rodar a API execute os comandos abaixo: 
 
  ```
