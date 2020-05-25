@@ -209,7 +209,6 @@ O endpoint acima retorna o usuário que corresponde ao email usado para a consul
 
 
 ```
-
 GET /users/:user_id
 
 //exemplo de body na requisição:
@@ -274,9 +273,8 @@ PATCH /users/:user_id
         "title": "Produto"
     }     
 }
-
 ```
-O endpoint acima é usado para que se possa atualizar o nome do usuário, porém o email não é possível que possa ser atualizado. 
+O endpoint acima é usado para que se possa atualizar o nome do usuário, porém o email não é possível ser atualizado. 
 
 ----
 
@@ -310,7 +308,7 @@ DELETE /users/:user_id
     }     
 }
 ```
-O endepoint retorna as informações do usuário deletado. 
+O endepoint deleta e retorna as informações do usuário. 
 
 ----
 
@@ -352,7 +350,7 @@ POST /users/:user_id/favorite_products
 }
 ```
 
-O endpoint retorna o usuário com o novo produto adicionado no final da sua lista de `"favorite_products"`. 
+O endpoint adiciona um produto novo na lista do usuário. 
 
 ----
 
@@ -386,7 +384,7 @@ DELETE  /users/:user_id/favorite_products
         "title": "Produto"
     }
 ```
-O endpoint retorna o usuário sem o produto deletado na lista de `"favorite_products"`.
+O endpoint deleta o produto da lista de favoritos de um usuário.
 
 ----
 
