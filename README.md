@@ -6,10 +6,6 @@ Além desse repositório a API também pode ser acessada através desse link:
 
 https://api-luiza.herokuapp.com/
 
-Ou rodada localmente:
-
- http://localhost:5000
-
 
 Como um dos requisitos exigidos foi restringir o acesso da API utilizando autenticação, será necessário gerar um token jwt no endpoint `/auth`. Esse token deverá ser enviado no `header` de toda requisiçao no campo `Authorization` prefixado com `Bearer`.  Seguindo as boas práticas de segurança o `admin_name` e `password` foram enviados por email.
 
