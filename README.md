@@ -15,7 +15,7 @@ Authorization: Bearer <token-de-autenticação>
 
 Abaixo segue um exemplo de como adquirir e utilizar o token.
 
-```JSON
+```bash
 POST /auth
 
 //exemplo de body na requisição:
@@ -90,7 +90,7 @@ Todos os exemplos assumem que o o token de autenticação está presente no head
 Authorization: Bearer <token-de-autenticação>
 ```
 
-```JSON
+```bash
 
 POST /auth
 
@@ -109,7 +109,7 @@ POST /auth
 O endpoint acima retorna o token necessária para autenticação.
 
 ---
-```JSON
+```bash
 POST /users
 
 // exemplo do body na requisição:
@@ -120,7 +120,7 @@ POST /users
 
 // exemplo de resposta:
 {
-  "id": ID,
+  "id": 1,
   "name": "user1",
   "email": "user1@gmail.com"
 }
@@ -128,7 +128,7 @@ POST /users
 O endpoint acima retorna o novo usuário criado.
 
 ---
-```JSON
+```bash
 
 GET /users
 
@@ -177,7 +177,7 @@ GET /users
 O endpoint acima retorna todos os usuários. Se houver produtos adicionados em `favorite_products` retornará as informações desses produtos, se não o campo virá com a lista vazia. 
 
 ----
-```JSON
+```bash
 GET /user_by_id
 
 //exemplo de body na requisição:
@@ -214,7 +214,7 @@ O endpoint acima retorna o usuário que corresponde ao email usado para a consul
 ----
 
 
-```JSON
+```bash
 
 GET /users/:user_id
 
@@ -250,7 +250,7 @@ O endpoint acima retorna as informações de um usuário.
 
 ----
 
-```JSON
+```bash
 PATCH /users/:user_id
 
 //exemplo de body na requisição:
@@ -286,7 +286,7 @@ O endpoint acima é usado para que se possa atualizar o nome do usuário, porém
 
 ----
 
-```JSON
+```bash
 DELETE /users/:user_id
 
 //exemplo de body na requisição:
@@ -320,7 +320,7 @@ O endepoint retorna as informações do usuário deletado.
 
 ----
 
-```JSON
+```bash
 POST /users/:user_id/favorite_products
 
 //exemplo de body na requisição:
@@ -363,7 +363,7 @@ O endpoint retorna o usuário com o novo produto adicionado no final da sua list
 ----
 
 
-```JSON
+```bash
 DELETE  /users/:user_id/favorite_products
 
 //exemplo de bodu na requisição:
