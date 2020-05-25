@@ -7,7 +7,11 @@ Além desse repositório a API também pode ser acessada através desse link:
 https://api-luiza.herokuapp.com/
 
 
-Como um dos requisitos exigidos foi restringir o acesso da API utilizando autenticação, será necessário gerar um token jwt no endpoint `/auth`. Esse token deverá ser enviado no `header` de toda requisiçao no campo `Authorization` prefixado com `Bearer`.  Seguindo as boas práticas de segurança o `admin_name` e `password` foram enviados por email.
+Como um dos requisitos exigidos foi restringir o acesso da API utilizando autenticação, será necessário gerar um token jwt no endpoint `/auth`. Esse token deverá ser enviado no `header` de toda requisiçao da seguinte forma: 
+
+``` 
+Authorization: Bearer <token-de-autenticação>
+``` 
 
 Abaixo segue um exemplo de como adquirir e utilizar o token.
 
@@ -17,15 +21,16 @@ POST /auth
 //exemplo de body na requisição:
 
 {
-  "admin_name": "ADMIN_NAME",
-  "password": "PASSWORD"
+  "admin_name": <admin-name>,
+  "password": <password>
 }
 
 //exemplo de resposta:
 {
-  "token": "<token-de-autenticação>"
+  "token": <token-de-autenticação>
 }
 ``` 
+Seguindo as boas práticas de segurança o ` <admin-name>` e `<password>` foram enviados por email.
 
 ----
 
@@ -98,7 +103,7 @@ POST /auth
 
 //exemplo de resposta:
 {
-  "token": "<token-de-autenticação>"
+  "token": <token-de-autenticação>
 }
 ``` 
 O endpoint acima retorna o token necessária para autenticação.
