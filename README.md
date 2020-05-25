@@ -360,7 +360,7 @@ DELETE  /users/:user_id/favorite_products
 
 //exemplo de bodu na requisição:
 {
-	"product_id": "12345678901234567890123453"
+    product_id": "12345678901234567890123453"
 }
 
 //exemplo de resposta:
