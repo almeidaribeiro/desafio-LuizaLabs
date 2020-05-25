@@ -63,13 +63,7 @@ docker exec -u postgres postgres psql postgres postgres -f createTables.sql
 Para clonar o repositório:
 
 ``` 
-SSH:
-
-git@github.com:almeidaribeiro/desafio-LuizaLabs.git
-
-HTTPS: 
-
-https://github.com/almeidaribeiro/desafio-LuizaLabs.git
+git clone https://github.com/almeidaribeiro/desafio-LuizaLabs.git
 ```
 Para rodar a API execute os comandos abaixo: 
 
