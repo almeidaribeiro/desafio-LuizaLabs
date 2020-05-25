@@ -317,7 +317,7 @@ POST /users/:user_id/favorite_products
 
 //exemplo de body na requisição:
 {
-	"product_id": "12345678901234567890123453"
+    "product_id": "12345678901234567890123453"
 }
 
 //exemplo de resposta:
