@@ -60,14 +60,16 @@ docker exec -u postgres postgres psql postgres postgres -f createTables.sql
 
 #### Rodar API
 
-Para clonar o repositório:
+Clonar o repositório:
 
-``` 
+```bash
 git clone https://github.com/almeidaribeiro/desafio-LuizaLabs.git
 ```
 Para rodar a API execute os comandos abaixo: 
 
  ```bash
+cd desafio-LuizaLabs
+ 
  docker build . -t luiza-api  
  
 docker run --name luiza-api -e ADMIN_NAME=luiza-admin -e PASSWORD=luiza-password -e SECRET=luiza-secret -e PGUSER=postgres -e PGHOST=localhost -e PGPASSWORD=postgres -e PGDATABASE=postgres -e PGPORT=5432 --network=host luiza-api 
