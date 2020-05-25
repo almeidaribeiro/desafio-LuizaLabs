@@ -199,7 +199,13 @@ const patchUsers = async (userId, userName, res) => {
   await executeSql(updateUserSql)
   const dbResp = await executeSql(selectUserSql)
   const rows = dbResp.rows
-  const payload = rowsToUser(rows)
+
+  const userRaw = rowsToUser(rows)
+
+  const payload = {
+    ...userRaw,
+    favorite_products: await getFavoriteProductsFromApi(userRaw.favorite_products)
+  }
   res.send(payload)
 }
 

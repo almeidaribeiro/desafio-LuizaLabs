@@ -1,193 +1,399 @@
-# Favorite Products API
+# Luiza Labs challenge
 
-Simple API for to save records about favorite products of a user.
+Essa é a submissão para o desafio da luiza labs para software engineer. O desafio consiste em implementar uma API que proverá o serviço de backend para uma feature de produtos favoritos que seria utilizado pelo site da Luiza Labs.
 
-## Getting Started 
+Além desse repositório a API também pode ser acessada através desse link:
 
-These instructions will  help you a run the project.
+https://api-luiza.herokuapp.com/
 
-### Prerequisites
+Ou rodada localmente:
 
-- Clone the repository:
-
-Clone with HTTPS
-```bash 
-https://github.com/almeidaribeiro/desafio-LuizaLabs.git
-``` 
-or 
-
-Clone with SSH
-
-```bash
-git@github.com:almeidaribeiro/desafio-LuizaLabs.git
-``` 
-
-- Install Docker 
-
-- Run Postgres on Docker 
-```bash 
-docker run --rm   --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 -v $HOME/docker/volumes/postgres:/var/lib/postgresql/data  postgres
-
-```
-- Execute the command for run the project 
- ```bash
-docker run --name luiza-api -e ADMIN_NAME=<name> -e PASSWORD=<password> -e SECRET=<secret> -e PGUSER=<postgres user> -e PGHOST=<localhost> -e PGPASSWORD=<postgres passsword> -e PGDATABASE=<postgres> -e PGPORT=<postgres port> --network=host luiza-api 
- ``` 
-
- - The project run on the localhost:5000
-
-## Resources 
+ http://localhost:5000
 
 
-### Authenticate
+Como um dos requisitos exigidos foi restringir o acesso da API utilizando autenticação, será necessário gerar um token jwt no endpoint `/auth`. Esse token deverá ser enviado no `header` de toda requisiçao no campo `Authorization` prefixado com `Bearer`.  Seguindo as boas práticas de segurança o `admin_name` e `password` foram enviados por email.
 
-This API is secured by JWT and the authentication endpoint lives under /auth/.
+Abaixo segue um exemplo de como adquirir e utilizar o token.
 
-`ADMIN_NAME=ADMIN_NAME` 
-
-`PASSWORD=PASSWORD` 
-
-
-***POST***
-
-  http://localhost:5000/auth
-
-Body: 
 ```JSON
+POST /auth
+
+//exemplo de body na requisição:
+
 {
   "admin_name": "ADMIN_NAME",
   "password": "PASSWORD"
 }
-``` 
-All requests need to have the Authorization header set.
 
-**Ex:**
+//exemplo de resposta:
+{
+  "token": "<token-de-autenticação>"
+}
+``` 
+
+----
+
+## Como rodar a API localmente
+
+Para rodar a aplicação localmente é necessário os seguintes passos:
+
+#### Instalar docker 
+
+Para instalar o Docker siga as instruções do link abaixo:
+
+https://docs.docker.com/get-docker/
+
+#### Rodar Postgres & criar tabelas
+
+Para rodar uma instancia do Postgres execute o seguinte comando docker:
+
+```bash 
+docker run --rm --name postgres -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres
+```
+Para criar as tabelas no de banco de dados execute os sequintes comandos:
+
 ```bash
-Authorization: Bearer Token 
+docker cp ./db/createTables.sql postgres:createTables.sql 
+docker exec -u postgres postgres psql postgres postgres -f createTables.sql
+```
 
-TOKEN: <token>
+#### Rodar API
 
-Prefix: Bearer
+Para clonar o repositório:
+
 ``` 
-## Users
+SSH:
 
-- ### Create a new user: 
+git@github.com:almeidaribeiro/desafio-LuizaLabs.git
 
-***POST***    
+HTTPS: 
 
-http://localhost:5000/users
+https://github.com/almeidaribeiro/desafio-LuizaLabs.git
+```
+Para rodar a API execute os comandos abaixo: 
 
-Body:
+ ```bash
+ docker build . -t luiza-api  
+ 
+docker run --name luiza-api -e ADMIN_NAME=luiza-admin -e PASSWORD=luiza-password -e SECRET=luiza-secret -e PGUSER=postgres -e PGHOST=localhost -e PGPASSWORD=postgres -e PGDATABASE=postgres -e PGPORT=5432 --network=host luiza-api 
+ ``` 
+ A API estará disponível em 
+ http://localhost:5000. 
+
+----
+
+## Como utilizar a API
+
+Todos os exemplos assumem que o o token de autenticação está presente no header da seguinter forma:
+```
+Authorization: Bearer <token-de-autenticação>
+```
 
 ```JSON
+
+POST /auth
+
+//exemplo de body na requisição:
+
 {
-    "name": "string",
-	"email": "string"
+  "admin_name": "luiza-admin",
+  "password": "luiza-password"
+}
+
+//exemplo de resposta:
+{
+  "token": "<token-de-autenticação>"
+}
+``` 
+O endpoint acima retorna o token necessária para autenticação.
+
+---
+```JSON
+POST /users
+
+// exemplo do body na requisição:
+{
+  "name": "user1",
+  "email": "user1@gmail.com"
+}
+
+// exemplo de resposta:
+{
+  "id": ID,
+  "name": "user1",
+  "email": "user1@gmail.com"
+}
+```
+O endpoint acima retorna o novo usuário criado.
+
+---
+```JSON
+
+GET /users
+
+//exemplo de body na requisição:
+{ 
+    //não é necessário um body.
+}
+
+//exemplo de resposta:
+[
+    {
+       "user_id": 1,
+       "name": "usuario1",
+       "email": "user1@gmail.com",
+       "favorite_products": [
+           {
+            "price": 1000,
+            "image": "http://api.com/images.jpg",
+            "brand": "marca do produto",
+            "id": "12345678901234567890123451",
+            "title": "Produto"
+        },
+        {     
+            "price": 1000,
+            "image": "http://api.com/images.jpg",
+            "brand": "marca do produto",
+            "id": "12345678901234567890123452",
+            "title": "Produto"
+        }     
+            ]
+     },
+     {
+       "user_id": 2,
+       "name": "usuario2",
+       "email": "user2@gmail.com",
+       "favorite_products": []
+     },
+     {
+       "user_id": 3,
+       "name": "usuario3",
+       "email": "user3@gmail.com",
+       "favorite_products": []
+     }
+]
+```
+O endpoint acima retorna todos os usuários. Se houver produtos adicionados em `favorite_products` retornará as informações desses produtos, se não o campo virá com a lista vazia. 
+
+----
+```JSON
+GET /user_by_id
+
+//exemplo de body na requisição:
+{
+"email": "user1@gmail.com"
+}
+
+//exemplo de resposta:
+{
+    "user_id": 1,
+    "name": "usuario1",
+    "email": "user1@gmail.com",
+    "favorite_products": [
+        {
+        "price": 1000,
+        "image": "http://api.com/images.jpg",
+        "brand": "marca do produto",
+        "id": "12345678901234567890123451",
+        "title": "Produto"
+    },
+    {     
+        "price": 1000,
+        "image": "http://api.com/images.jpg",
+        "brand": "marca do produto",
+        "id": "12345678901234567890123452",
+        "title": "Produto"
+    }     
+        ]
+    }
+
+```
+O endpoint acima retorna o usuário que corresponde ao email usado para a consulta. 
+
+----
+
+
+```JSON
+
+GET /users/:user_id
+
+//exemplo de body na requisição:
+{
+     //não é necessário um body.
+}
+
+//exemplo de resposta:
+{
+    "user_id": 1,
+    "name": "usuario1",
+    "email": "user1@gmail.com",
+    "favorite_products": [
+        {
+        "price": 1000,
+        "image": "http://api.com/images.jpg",
+        "brand": "marca do produto",
+        "id": "12345678901234567890123451",
+        "title": "Produto"
+    },
+    {     
+        "price": 1000,
+        "image": "http://api.com/images.jpg",
+        "brand": "marca do produto",
+        "id": "12345678901234567890123452",
+        "title": "Produto"
+    }     
+}
+
+```
+O endpoint acima retorna as informações de um usuário.
+
+----
+
+```JSON
+PATCH /users/:user_id
+
+//exemplo de body na requisição:
+{
+	"name": "usuário1111",
+	"email": "user1@gmail.com"
+}
+
+//exemplo de resposta:
+{
+    "user_id": 1,
+    "name": "usuario1111",
+    "email": "user1@gmail.com",
+    "favorite_products": [
+        {
+        "price": 1000,
+        "image": "http://api.com/images.jpg",
+        "brand": "marca do produto",
+        "id": "12345678901234567890123451",
+        "title": "Produto"
+    },
+    {     
+        "price": 1000,
+        "image": "http://api.com/images.jpg",
+        "brand": "marca do produto",
+        "id": "12345678901234567890123452",
+        "title": "Produto"
+    }     
+}
+
+```
+O endpoint acima é usado para que se possa atualizar o nome do usuário, porém o email não é possível que possa ser atualizado. 
+
+----
+
+```JSON
+DELETE /users/:user_id
+
+//exemplo de body na requisição:
+{
+    //não é necessário um body.
+}
+
+//exemplo de resposta:
+{
+    "user_id": 1,
+    "name": "usuario1111",
+    "email": "user1@gmail.com",
+    "favorite_products": [
+        {
+        "price": 1000,
+        "image": "http://api.com/images.jpg",
+        "brand": "marca do produto",
+        "id": "12345678901234567890123451",
+        "title": "Produto"
+    },
+    {     
+        "price": 1000,
+        "image": "http://api.com/images.jpg",
+        "brand": "marca do produto",
+        "id": "12345678901234567890123453",
+        "title": "Produto"
+    }     
+}
+```
+O endepoint retorna as informações do usuário deletado. 
+
+----
+
+```JSON
+POST /users/:user_id/favorite_products
+
+//exemplo de body na requisição:
+{
+	"product_id": "12345678901234567890123453"
+}
+
+//exemplo de resposta:
+{
+    "user_id": 1,
+    "name": "usuario1111",
+    "email": "user1@gmail.com",
+    "favorite_products": [
+        {
+        "price": 1000,
+        "image": "http://api.com/images.jpg",
+        "brand": "marca do produto",
+        "id": "12345678901234567890123451",
+        "title": "Produto"
+    },
+    {     
+        "price": 1000,
+        "image": "http://api.com/images.jpg",
+        "brand": "marca do produto",
+        "id": "12345678901234567890123452",
+        "title": "Produto"
+    },
+    {     
+        "price": 1000,
+        "image": "http://api.com/images.jpg",
+        "brand": "marca do produto",
+        "id": "12345678901234567890123453",
+        "title": "Produto"
+    }      
 }
 ```
 
+O endpoint retorna o usuário com o novo produto adicionado no final da sua lista de `"favorite_products"`. 
 
-- ### Can get all users: 
+----
 
-***GET***
-
-http://localhost:5000/users
-
-Body: 
 
 ```JSON
-No need a body.
-```
+DELETE  /users/:user_id/favorite_products
 
-
-- ### Find a user by email (for get your ID):
-
-***GET***
-
-http://localhost:5000/user_by_email
-
-Body: 
-
-```JSON
+//exemplo de bodu na requisição:
 {
-"email": "string"
+	"product_id": "12345678901234567890123453"
 }
-```
 
-- ### Find a user by ID:
-
-***GET***
-
-Need to pass a ID in a path.
-
-http://localhost:5000/users/:user_id
-
-Body:
-
-```JSON
-No need a body.
-```
-- ### Update a user 
-
-***PATCH***
-
-Need to pass a ID in a path.
-
-http://localhost:5000/users/:user_id
-
-Body:
-
-```JSON
+//exemplo de resposta:
 {
-	"name": "string",
-	"email": "string"
-}
+    "user_id": 1,
+    "name": "usuario1111",
+    "email": "user1@gmail.com",
+    "favorite_products": [
+        {
+        "price": 1000,
+        "image": "http://api.com/images.jpg",
+        "brand": "marca do produto",
+        "id": "12345678901234567890123451",
+        "title": "Produto"
+    },
+    {     
+        "price": 1000,
+        "image": "http://api.com/images.jpg",
+        "brand": "marca do produto",
+        "id": "12345678901234567890123452",
+        "title": "Produto"
+    }
 ```
+O endpoint retorna o usuário sem o produto deletado na lista de `"favorite_products"`.
 
-- ### Delete a user 
+----
 
-***DELETE***
-
-Need to pass a ID in a path.
-
-http://localhost:5000/users/:user_id
-
-Body:
-
-```JSON
-No need a body.
-```
-
-## Favorite Products 
-
-- ### Add a new product on the list
-
-***POST***
-
-Need to pass a ID in a path.
-
-http://localhost:5000/users/:user_id/favorite_products
-
-Body: 
-
-```JSON
-{
-	"product_id": "string: pass the product id"
-}
-```
-- ### Delete a product of the list
-
-***DELETE***
-
-Need to pass a ID in a path.
-
-http://localhost:5000/users/:user_id/favorite_products
-
-Body:
-
-```JSON
-{
-	"product_id": "string:pass the product id
-"
-}
-```
+#### Considerações finais
+Ao executar as requisições, dependendo do números de produtos adicionados poderá haver uma demora, isso ocorre devido ao tempo de pausa que foi adicianado entre as requisções realizadas por essa API para a API de produtos que foi disponibilazada para o desenvolvimento desse desafio. Essa pausa foi necessária pois a API de produtos não permitia múltiplas requisições com intervalos muito curtos entre si. 

@@ -27,8 +27,5 @@ COPY run.js run.js
 
 RUN npm install 
 
-EXPOSE 3000
 
 CMD ["node", "run.js"]
-
-docker run --name luiza-api -e ADMIN_NAME=luiza -e PASSWORD=luizathebest -e SECRET=simba -e PGUSER=boo -e PGHOST=localhost -e PGPASSWORD=boodb -e PGDATABASE=postgres -e PGPORT=5432 --network=host luiza-api 
